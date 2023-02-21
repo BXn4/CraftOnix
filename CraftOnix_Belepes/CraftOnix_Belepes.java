@@ -41,7 +41,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                 String utvonalJatekos = hely.toAbsolutePath().toString() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yaml";
                 File jatekosFiok = new File(utvonalJatekos);
                 if (jatekosFiok.exists()) {
-                    jatekos.sendMessage(" \n ");
                     jatekos.sendMessage("§8[§4>>§8] §7Ezt a parancsot nem használhatod!§r");
                 } else {
                     bemenet = String.join(" ", args);
@@ -65,6 +64,12 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                         terkep.clear();
                         ossz = "";
                         bemenet = "";
+                        String cim = "Üdv, " + jatekos.getName() + "!";
+                        String alcim = "Érezd jól magad!";
+                        int megelenes = 5;
+                        int idotartam = 70;
+                        int eltunes = 10;
+                        jatekos.sendTitle(cim, alcim, megelenes, idotartam, eltunes);
                     } else {
                         jatekos.sendMessage(" \n ");
                         jatekos.sendMessage("§8[§4>>§8] §7A jelszavadnak minimum §l6 §r§7karakternek kell lennie, illetve nem tartalmazhat szóközt!§r");
@@ -100,6 +105,12 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                         if (jatekosU.equals(bemenet)){
                             jatekos.sendMessage(" \n ");
                             jatekos.sendMessage("§8[§2>>§8] §7Sikeres bejelentkezés!\n \nÜdv újra a szerveren, " + jatekos.getName() + "!");
+                            String cim = "Üdv újra, " + jatekos.getName() + "!";
+                            String alcim = "Kellemes időtöltést!";
+                            int megelenes = 5;
+                            int idotartam = 70;
+                            int eltunes = 10;
+                            jatekos.sendTitle(cim, alcim, megelenes, idotartam, eltunes);
 
                         }
                         else {
@@ -107,7 +118,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                             jatekos.sendMessage("§8[§4>>§8] §7Helytelen jelszó!");
                         }
                     } else {
-                        jatekos.sendMessage(" \n ");
                         jatekos.sendMessage("§8[§4>>§8] §7Ezt a parancsot nem használhatod!§r");
                     }
             } catch (NoSuchPaddingException e) {
