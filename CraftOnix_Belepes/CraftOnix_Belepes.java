@@ -28,7 +28,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                 if (parancs.getName().equalsIgnoreCase("regisztral")) {
                     Player jatekos = (Player) kuldo;
                     String bemenet = String.join(" ", args);
-                    if (bemenet.length() > 6 && !bemenet.contains(" ")) {
+                    if (bemenet.length() > 5 && !bemenet.contains(" ")) {
                         String kulcsString = "KULCS:)";
                         SecretKey kulcs = new SecretKeySpec(kulcsString.getBytes(), "AES");
                         Cipher cipher = Cipher.getInstance("AES");
