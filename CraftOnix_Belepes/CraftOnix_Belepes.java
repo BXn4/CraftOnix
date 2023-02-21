@@ -41,18 +41,17 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                 String utvonalJatekos = hely.toAbsolutePath().toString() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yaml";
                 File jatekosFiok = new File(utvonalJatekos);
                 if (jatekosFiok.exists()) {
-                    jatekos.sendMessage(" ");
-                    jatekos.sendMessage(" ");
+                    jatekos.sendMessage(" \n ");
                     jatekos.sendMessage("§8[§4>>§8] §7Ezt a parancsot nem használhatod!§r");
                 } else {
                     bemenet = String.join(" ", args);
                     if (bemenet.length() > 5 && !bemenet.contains(" ")) {
+                        Cipher cipher = Cipher.getInstance("AES");
                         cipher.init(Cipher.ENCRYPT_MODE, jatekosKulcs);
                         byte[] byteok = cipher.doFinal(bemenet.getBytes());
                         String jatekosU = Base64.getEncoder().encodeToString(byteok);
                         terkep.put(jatekos.getUniqueId(), jatekosU);
-                        jatekos.sendMessage(" ");
-                        jatekos.sendMessage(" ");
+                        jatekos.sendMessage(" \n ");
                         for (Map.Entry<UUID, String> entry : terkep.entrySet()) {
                             Yaml yaml = new Yaml();
                             Map<String, String> adat = new HashMap<>();
@@ -62,13 +61,12 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                             yaml.dump(adat, iras);
                             iras.close();
                         }
-                        jatekos.sendMessage("§8[§2>>§8] §7Sikeres regisztráció! A legközelebbi csatlakozásnál a megadott jelszóval tudsz belépni.§r");
+                        jatekos.sendMessage("§8[§2>>§8] §7Sikeres regisztráció! A legközelebbi csatlakozásnál a megadott jelszóval tudsz bejelentkezni.§r");
                         terkep.clear();
                         ossz = "";
                         bemenet = "";
                     } else {
-                        jatekos.sendMessage(" ");
-                        jatekos.sendMessage(" ");
+                        jatekos.sendMessage(" \n ");
                         jatekos.sendMessage("§8[§4>>§8] §7A jelszavadnak minimum §l6 §r§7karakternek kell lennie, illetve nem tartalmazhat szóközt!§r");
                     }
                 }
@@ -95,24 +93,21 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                             throw new RuntimeException(e);
                         }
                         String jatekosVisszakapott = data.get("PASSWD");
-                        jatekos.sendMessage("PASSWD A FILEBOL: " + jatekosVisszakapott);
-                        jatekos.sendMessage(" ");
-                        jatekos.sendMessage(" ");
+                        Cipher cipher = Cipher.getInstance("AES");
                         cipher.init(Cipher.DECRYPT_MODE, jatekosKulcs);
                         byte[] byteok = cipher.doFinal(Base64.getDecoder().decode(jatekosVisszakapott));
                         String jatekosU = new String(byteok);
-                        jatekos.sendMessage("jatekosU (decrypt): " + jatekosU);
-                        jatekos.sendMessage("Bemenet (plain): " + bemenet);
                         if (jatekosU.equals(bemenet)){
-                            jatekos.sendMessage("Bemenet (plain): " + bemenet);
-                            jatekos.sendMessage("Bemenet (plain): " + bemenet);
-                            jatekos.sendMessage("Bemenet (plain): " + bemenet);
-                            jatekos.sendMessage("MUKIDIK");
+                            jatekos.sendMessage(" \n ");
+                            jatekos.sendMessage("§8[§2>>§8] §7Sikeres bejelentkezés!\n \nÜdv újra a szerveren, " + jatekos.getName() + "!");
 
                         }
+                        else {
+                            jatekos.sendMessage(" \n ");
+                            jatekos.sendMessage("§8[§4>>§8] §7Helytelen jelszó!");
+                        }
                     } else {
-                        jatekos.sendMessage(" ");
-                        jatekos.sendMessage(" ");
+                        jatekos.sendMessage(" \n ");
                         jatekos.sendMessage("§8[§4>>§8] §7Ezt a parancsot nem használhatod!§r");
                     }
             } catch (NoSuchPaddingException e) {
