@@ -1,7 +1,7 @@
 package bxn4.craftonix_belepes;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -28,6 +28,7 @@ import java.io.IOException;
 
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.yaml.snakeyaml.Yaml;
 
 public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Listener {
@@ -52,27 +53,68 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
         getCommand("regisztral").setExecutor(this);
         getServer().getPluginManager().registerEvents(this, this);
     }
+
     @EventHandler
-    public void jatekosCsatlakozik(PlayerJoinEvent event){
+    public void jatekosCsatlakozik(PlayerJoinEvent event) throws Exception {
+        Player jatekos = event.getPlayer();
+        jatekos.setGameMode(GameMode.ADVENTURE);
+        jatekosUUID = jatekos.getUniqueId().toString();
         String utvonalJatekos = hely.toAbsolutePath().toString() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml";
         File jatekosFiok = new File(utvonalJatekos);
-        Player jatekos = event.getPlayer();
         jatekos.addPotionEffect(lassusagEffekt);
         jatekos.addPotionEffect(vaksagEffekt);
         jatekos.addPotionEffect(ugrasEffekt);
         jatekos.addPotionEffect(lassuBanyaszasEffekt);
         event.getPlayer().setNoDamageTicks(Integer.MAX_VALUE);
         bejelentkezetlen.put(jatekos.getPlayer(), "Nincs bejelentkezve!");
+        System.out.println(utvonalJatekos);
+        System.out.println(jatekosFiok);
         if (jatekosFiok.exists()) {
-            jatekos.sendMessage(" \n \n§8[§6>>§8] §7Üdv újra a szerveren!\n \nKérlek jelentkezz be a: §l§a/belep <jelszó> §r§7paranccsal!§r");
+            jatekos.sendMessage("§8[§6>>§8] §7Üdv újra a szerveren!\n \nKérlek jelentkezz be a: §l§a/belep <jelszó> §r§7paranccsal!§r");
+            new BukkitRunnable() {
+                int i = 0;
+                @Override
+                public void run() {
+                    if(bejelentkezetlen.containsKey(event.getPlayer())) {
+                        jatekos.sendMessage("§7Jelentkezz be a szerverre a: §l§a/belep <jelszó> §r§7paranccsal!§r");
+                        i++;
+                    }
+                    else{
+                        cancel();
+                    }
+                    if (i > 4 && bejelentkezetlen.containsKey(event.getPlayer())) {
+                        jatekos.kickPlayer("Lejárt a belépésre alkalmas időd!");
+                        cancel();
+                    }
+                }
+            }.runTaskTimer(this, 700, 700);
         } else {
-            jatekos.sendMessage(" \n \n§8[§6>>§8] §7Üdv a szerveren!\n \nAhhoz, hogy tudj játszani regisztrálnod kell a szerverre. Ezt megteheted a: §l§a/regisztral <jelszó> §r§7paranccsal!§r");
+            jatekos.sendMessage("§8[§6>>§8] §7Üdv a szerveren!\n \nAhhoz, hogy tudj játszani regisztrálnod kell a szerverre. Ezt  egyszerűen megteheted a: §l§a/regisztral <jelszó> §r§7paranccsal!§r");
+            new BukkitRunnable() {
+                int i = 0;
+                @Override
+                public void run() {
+                    if(bejelentkezetlen.containsKey(event.getPlayer())) {
+                        jatekos.sendMessage("§7Regisztrálj a szerverre a: §l§a/regisztral <jelszó> §r§7paranccsal!§r");
+                        i++;
+                    }
+                    else{
+                        cancel();
+                    }
+                    if (i > 4 && bejelentkezetlen.containsKey(event.getPlayer())) {
+                        jatekos.kickPlayer("Lejárt a regisztrálásra alkalmas időd!");
+                        cancel();
+                    }
+                }
+            }.runTaskTimer(this, 700, 700);
         }
     }
+
     @EventHandler
-    public void jatekosKilep(PlayerQuitEvent event){
+    public void jatekosKilep(PlayerQuitEvent event) {
         Bukkit.broadcastMessage("§8[§4-§8] §7§ " + event.getPlayer().getName());
     }
+
     @EventHandler
     public void jatekosMozgas(PlayerMoveEvent event) {
         if (bejelentkezetlen.containsKey(event.getPlayer())) {
@@ -81,9 +123,10 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
             }
         }
     }
+
     @EventHandler
     public void sebzes(EntityDamageEvent event, PlayerEvent e) {
-        if(bejelentkezetlen.containsKey(e.getPlayer())){
+        if (bejelentkezetlen.containsKey(e.getPlayer())) {
             if (event.getEntity() instanceof Player) {
                 event.setCancelled(true);
             }
@@ -108,7 +151,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                         byte[] byteok = cipher.doFinal(bemenet.getBytes());
                         String jatekosU = Base64.getEncoder().encodeToString(byteok);
                         terkep.put(jatekos.getUniqueId(), jatekosU);
-                        jatekos.sendMessage(" \n ");
                         for (Map.Entry<UUID, String> entry : terkep.entrySet()) {
                             Yaml yaml = new Yaml();
                             Map<String, String> adat = new HashMap<>();
@@ -120,6 +162,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                         }
                         Bukkit.broadcastMessage("§8[§2+§8] §7§ " + jatekos.getName());
                         jatekos.sendMessage("§8[§2>>§8] §7Sikeres regisztráció! A legközelebbi csatlakozásnál a megadott jelszóval tudsz bejelentkezni.§r");
+                        jatekos.setGameMode(GameMode.SURVIVAL);
                         jatekos.removePotionEffect(lassusag);
                         jatekos.removePotionEffect(vaksag);
                         jatekos.removePotionEffect(ugras);
@@ -167,9 +210,10 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                     cipher.init(Cipher.DECRYPT_MODE, jatekosKulcs);
                     byte[] byteok = cipher.doFinal(Base64.getDecoder().decode(jatekosVisszakapott));
                     String jatekosU = new String(byteok);
-                    if (jatekosU.equals(bemenet)){
+                    if (jatekosU.equals(bemenet)) {
                         Bukkit.broadcastMessage("§8[§2+§8] §7§ " + jatekos.getName());
                         jatekos.sendMessage("§8[§2>>§8] §7Sikeres bejelentkezés!");
+                        jatekos.setGameMode(GameMode.SURVIVAL);
                         jatekos.removePotionEffect(lassusag);
                         jatekos.removePotionEffect(vaksag);
                         jatekos.removePotionEffect(ugras);
@@ -182,8 +226,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                         jatekos.sendTitle(cim, alcim, megelenes, idotartam, eltunes);
                         jatekos.getPlayer().setNoDamageTicks(200);
                         bejelentkezetlen.remove(jatekos.getPlayer(), "Nincs bejelentkezve!");
-                    }
-                    else {
+                    } else {
                         jatekos.sendMessage("§8[§4>>§8] §7Helytelen jelszó!");
                     }
                 } else {
