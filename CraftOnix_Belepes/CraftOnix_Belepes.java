@@ -13,12 +13,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.Listener;
 
 import java.io.*;
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.FileWriter;
@@ -28,6 +25,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.yaml.snakeyaml.Yaml;
+
 
 public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Listener {
     private HashMap<UUID, String> terkep = new HashMap<>();
@@ -195,7 +193,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                 jatekosUUID = jatekos.getUniqueId().toString();
                 String utvonalJatekos = hely.toAbsolutePath().toString() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml";
                 File jatekosFiok = new File(utvonalJatekos);
-                if (jatekosFiok.exists()) {
+                if (jatekosFiok.exists() && bejelentkezetlen.containsKey(jatekos.getPlayer())) {
                     Yaml yaml = new Yaml();
                     Map<String, String> adat;
                     try (FileInputStream fis = new FileInputStream(utvonalJatekos)) {
@@ -236,7 +234,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                     jatekos.sendMessage("§8[§4>>§8] §7Ezt a parancsot nem használhatod!§r");
                 }
             }
-             catch (NoSuchAlgorithmException e) {
+            catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
             return true;
