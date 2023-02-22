@@ -56,6 +56,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
 
     @EventHandler
     public void jatekosCsatlakozik(PlayerJoinEvent event) throws Exception {
+        event.setJoinMessage("");
         Player jatekos = event.getPlayer();
         jatekos.setGameMode(GameMode.ADVENTURE);
         jatekosUUID = jatekos.getUniqueId().toString();
@@ -112,6 +113,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
 
     @EventHandler
     public void jatekosKilep(PlayerQuitEvent event) {
+        event.setQuitMessage("");
         Bukkit.broadcastMessage("§8[§4-§8] §7§ " + event.getPlayer().getName());
     }
 
