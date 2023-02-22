@@ -14,13 +14,11 @@ import org.bukkit.event.Listener;
 
 import java.io.*;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.Base64;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.FileWriter;
@@ -147,11 +145,13 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                 } else {
                     bemenet = String.join(" ", args);
                     if (bemenet.length() > 5 && !bemenet.contains(" ")) {
-                        SecretKey jatekosKulcs = new SecretKeySpec(ossz.getBytes(), "AES");
-                        Cipher cipher = Cipher.getInstance("AES");
-                        cipher.init(Cipher.ENCRYPT_MODE, jatekosKulcs);
-                        byte[] byteok = cipher.doFinal(bemenet.getBytes());
-                        String jatekosU = Base64.getEncoder().encodeToString(byteok);
+                        MessageDigest md = MessageDigest.getInstance("SHA-512");
+                        byte[] hash = md.digest(bemenet.getBytes());
+                        StringBuilder sb = new StringBuilder();
+                        for (byte b : hash) {
+                            sb.append(String.format("%02x", b));
+                        }
+                        String jatekosU = sb.toString();
                         terkep.put(jatekos.getUniqueId(), jatekosU);
                         for (Map.Entry<UUID, String> entry : terkep.entrySet()) {
                             Yaml yaml = new Yaml();
@@ -170,7 +170,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                         jatekos.removePotionEffect(ugras);
                         jatekos.removePotionEffect(lassuBanyaszas);
                         terkep.clear();
-                        ossz = "";
                         bemenet = "";
                         String cim = "Üdv, " + jatekos.getName() + "!";
                         String alcim = "Érezd jól magad!";
@@ -207,12 +206,14 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                         throw new RuntimeException(e);
                     }
                     String jatekosVisszakapott = adat.get("PASSWD");
-                    SecretKey jatekosKulcs = new SecretKeySpec(ossz.getBytes(), "AES");
-                    Cipher cipher = Cipher.getInstance("AES");
-                    cipher.init(Cipher.DECRYPT_MODE, jatekosKulcs);
-                    byte[] byteok = cipher.doFinal(Base64.getDecoder().decode(jatekosVisszakapott));
-                    String jatekosU = new String(byteok);
-                    if (jatekosU.equals(bemenet)) {
+                    MessageDigest md = MessageDigest.getInstance("SHA-512");
+                    byte[] hash = md.digest(bemenet.getBytes());
+                    StringBuilder sb = new StringBuilder();
+                    for (byte b : hash) {
+                        sb.append(String.format("%02x", b));
+                    }
+                    String jatekosU = sb.toString();
+                    if (jatekosU.equals(jatekosVisszakapott)) {
                         Bukkit.broadcastMessage("§8[§2+§8] §7§ " + jatekos.getName());
                         jatekos.sendMessage("§8[§2>>§8] §7Sikeres bejelentkezés!");
                         jatekos.setGameMode(GameMode.SURVIVAL);
@@ -234,15 +235,8 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                 } else {
                     jatekos.sendMessage("§8[§4>>§8] §7Ezt a parancsot nem használhatod!§r");
                 }
-            } catch (NoSuchPaddingException e) {
-                throw new RuntimeException(e);
-            } catch (IllegalBlockSizeException e) {
-                throw new RuntimeException(e);
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            } catch (BadPaddingException e) {
-                throw new RuntimeException(e);
-            } catch (InvalidKeyException e) {
+            }
+             catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
             return true;
