@@ -8,7 +8,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.event.Listener;
@@ -32,7 +31,7 @@ import java.io.InputStreamReader;
 import org.yaml.snakeyaml.Yaml;
 
 public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Listener {
-    private ArrayList<String> gyakoriJelszavak = new ArrayList<String >();
+    private ArrayList<String> gyakoriJelszavak = new ArrayList<String>();
     private final HashMap<UUID, String> terkep = new HashMap<UUID, String>();
     private final HashMap<Player, String> bejelentkezetlen = new HashMap<Player, String>();
     private final HashMap<String, String> bejelentkezet = new HashMap<String, String>();
@@ -49,7 +48,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
     PotionEffect vaksagEffekt = new PotionEffect(vaksag, idotartam, erosseg);
     PotionEffect ugrasEffekt = new PotionEffect(ugras, idotartam, 250);
     PotionEffect lassuBanyaszasEffekt = new PotionEffect(lassuBanyaszas, idotartam, erosseg);
-    int hibasJelszoSzamlalo = 0;
 
     public void onEnable() {
         getCommand("belep").setExecutor(this);
@@ -75,7 +73,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
 
     @EventHandler
     public void jatekosCsatlakozik(PlayerJoinEvent event) throws Exception {
-        System.out.println(bejelentkezet);
         String ipCim = "";
         try {
             URL urlcim = new URL("https://ipapi.co/" + event.getPlayer().getAddress().getAddress().getHostAddress() + "/ip/");
@@ -94,6 +91,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                 if (cim.equals(ipCim.toString())) {
                     event.setJoinMessage("");
                     event.getPlayer().sendMessage("§8[§2>>§8] §7Sikeresen újracsatlakoztál! Ha azonnal kiszeretnél jelentkezni, akkor használd a /kijelentkez parancsot!§r");
+                    Bukkit.broadcastMessage("§8[§2+§8] §7§ " + event.getPlayer().getName());
                 }
                 else {
                     event.getPlayer().kickPlayer("Nem sikerült csatlakoznod a szerverre, mert más helyről próbáltál csatlakozni. Kérlek várj pár másodpercet, vagy csatlakozz arról az eszközről, amiről kiléptél!");
@@ -113,8 +111,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
             jatekos.addPotionEffect(lassuBanyaszasEffekt);
             event.getPlayer().setNoDamageTicks(Integer.MAX_VALUE);
             bejelentkezetlen.put(jatekos.getPlayer(), "Nincs bejelentkezve!");
-            System.out.println(utvonalJatekos);
-            System.out.println(jatekosFiok);
             if (jatekosFiok.exists()) {
                 jatekos.sendMessage("§8[§6>>§8] §7Üdv újra a szerveren!\n \nKérlek jelentkezz be a: §l§a/belep <jelszó> §r§7paranccsal!§r");
                 new BukkitRunnable() {
@@ -180,13 +176,13 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
             public void run() {
                 if (!event.getPlayer().isOnline()){
                     i++;
-                    System.out.println("Mindjárt kilépek!" + i);
+                    //System.out.println("Mindjárt kilépek!" + i);
                 } else {
                     cancel();
                 }
                 if (i > 4) {
                    bejelentkezet.remove(event.getPlayer().getName());
-                    System.out.println("Kilépve!" + i);
+                    //System.out.println("Kilépve!" + i);
                     cancel();
                 }
             }
@@ -219,23 +215,23 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
         }
         if (parancs.getName().equalsIgnoreCase("regisztral") || parancs.getName().equalsIgnoreCase("r")) {
             try {
-                System.out.println("A játékos beírta a parancsot.");
+                //System.out.println("A játékos beírta a parancsot.");
                 jatekosUUID = jatekos.getUniqueId().toString();
                 String utvonalJatekos = hely.toAbsolutePath() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml";
                 File jatekosFiok = new File(utvonalJatekos);
                 if (jatekosFiok.exists()) {
-                    System.out.println("A játékos létezik.");
+                    //System.out.println("A játékos létezik.");
                     jatekos.sendMessage("§8[§4>>§8] §7Ezt a parancsot nem használhatod!§r");
                 } else {
-                    System.out.println("A játékos nem létezik.");
+                    //System.out.println("A játékos nem létezik.");
                     bemenet = String.join(" ", args);
                     if(gyakoriJelszavak.contains(bemenet) /*&& (bemenet == jatekos.getName())*/){
                         jatekos.sendMessage("§8[§4>>§8] §7Ez a jelszó nem biztonságos! Kérlek használj más jelszót!§r");
                     }
                     else {
-                        System.out.println("A játékos jelszava megfelelő.");
+                        //System.out.println("A játékos jelszava megfelelő.");
                         if (bemenet.length() > 5 && !bemenet.contains(" ")) {
-                            System.out.println("A játékos regisztrálása.");
+                           //System.out.println("A játékos regisztrálása.");
                             MessageDigest md = MessageDigest.getInstance("SHA-512");
                             byte[] hash = md.digest(bemenet.getBytes());
                             StringBuilder sb = new StringBuilder();
@@ -252,9 +248,9 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                                 FileWriter iras = new FileWriter(hely.toAbsolutePath() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml");
                                 yaml.dump(adat, iras);
                                 iras.close();
-                                System.out.println("A játékos regisztrálva.");
+                                //System.out.println("A játékos regisztrálva.");
                             }
-                            System.out.println("Kilépés a ciklusból");
+                            //System.out.println("Kilépés a ciklusból");
                             jatekos.sendMessage("§8[§2>>§8] §7Sikeres regisztráció! A legközelebbi csatlakozásnál a megadott jelszóval tudsz bejelentkezni.§r");
                             String ipCim = "";
                             try {
@@ -322,7 +318,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                     String jatekosU = sb.toString();
                     if (jatekosU.equals(jatekosVisszakapott)) {
                         jatekos.sendMessage("§8[§2>>§8] §7Sikeres bejelentkezés!");
-                        System.out.println(bejelentkezet);
                         String ipCim = "";
                         try {
                             URL urlcim = new URL("https://ipapi.co/" + jatekos.getPlayer().getAddress().getAddress().getHostAddress() + "/ip/");
