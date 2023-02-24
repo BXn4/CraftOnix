@@ -24,6 +24,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -31,6 +35,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
     private ArrayList<String> gyakoriJelszavak = new ArrayList<String >();
     private final HashMap<UUID, String> terkep = new HashMap<UUID, String>();
     private final HashMap<Player, String> bejelentkezetlen = new HashMap<Player, String>();
+    private final HashMap<String, String> bejelentkezet = new HashMap<String, String>();
     private final Path hely = Paths.get("");
     private String bemenet = "";
     private String jatekosUUID = "";
@@ -51,6 +56,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
         getCommand("regisztral").setExecutor(this);
         getCommand("b").setExecutor(this);
         getCommand("r").setExecutor(this);
+        getCommand("kijelentkez").setExecutor(this);
         getServer().getPluginManager().registerEvents(this, this);
         File gyakoriJelszavakFile = new File(hely.toAbsolutePath() + "/plugins/CraftOnix/gyakoriJelszavak.jelszavak");
         try {
@@ -69,68 +75,95 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
 
     @EventHandler
     public void jatekosCsatlakozik(PlayerJoinEvent event) throws Exception {
-        event.setJoinMessage("");
-        Player jatekos = event.getPlayer();
-        jatekos.setGameMode(GameMode.ADVENTURE);
-        jatekosUUID = jatekos.getUniqueId().toString();
-        String utvonalJatekos = hely.toAbsolutePath() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml";
-        File jatekosFiok = new File(utvonalJatekos);
-        jatekos.addPotionEffect(lassusagEffekt);
-        jatekos.addPotionEffect(vaksagEffekt);
-        jatekos.addPotionEffect(ugrasEffekt);
-        jatekos.addPotionEffect(lassuBanyaszasEffekt);
-        event.getPlayer().setNoDamageTicks(Integer.MAX_VALUE);
-        bejelentkezetlen.put(jatekos.getPlayer(), "Nincs bejelentkezve!");
-        System.out.println(utvonalJatekos);
-        System.out.println(jatekosFiok);
-        if (jatekosFiok.exists()) {
-            jatekos.sendMessage("§8[§6>>§8] §7Üdv újra a szerveren!\n \nKérlek jelentkezz be a: §l§a/belep <jelszó> §r§7paranccsal!§r");
-            new BukkitRunnable() {
-                int i = 0;
-                @Override
-                public void run() {
-                    if(bejelentkezetlen.containsKey(event.getPlayer())) {
-                        jatekos.addPotionEffect(lassusagEffekt);
-                        jatekos.addPotionEffect(vaksagEffekt);
-                        jatekos.addPotionEffect(ugrasEffekt);
-                        jatekos.addPotionEffect(lassuBanyaszasEffekt);
-                        event.getPlayer().setNoDamageTicks(Integer.MAX_VALUE);
-                        jatekos.sendMessage("§7Jelentkezz be a szerverre a: §l§a/belep <jelszó> §r§7paranccsal!§r");
-                        i++;
-                    }
-                    else{
-                        cancel();
-                    }
-                    if (i > 4 && bejelentkezetlen.containsKey(event.getPlayer())) {
-                        jatekos.kickPlayer("Lejárt a belépésre alkalmas időd!");
-                        cancel();
-                    }
+        System.out.println(bejelentkezet);
+        String ipCim = "";
+        try {
+            URL urlcim = new URL("https://ipapi.co/" + event.getPlayer().getAddress().getAddress().getHostAddress() + "/ip/");
+            HttpURLConnection csatlakozas = (HttpURLConnection) urlcim.openConnection();
+            csatlakozas.setRequestMethod("GET");
+            BufferedReader olvas = new BufferedReader(new InputStreamReader(csatlakozas.getInputStream()));
+            ipCim = olvas.readLine();
+            olvas.close();
+            csatlakozas.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (bejelentkezet.containsKey(event.getPlayer().getName())) {
+            for (Map.Entry<String, String> ellenorzes : bejelentkezet.entrySet()) {
+                String cim = ellenorzes.getValue();
+                if (cim.equals(ipCim.toString())) {
+                    event.setJoinMessage("");
+                    event.getPlayer().sendMessage("§8[§2>>§8] §7Sikeresen újracsatlakoztál! Ha azonnal kiszeretnél jelentkezni, akkor használd a /kijelentkez parancsot!§r");
                 }
-            }.runTaskTimer(this, 700, 700);
-        } else {
-            jatekos.sendMessage("§8[§6>>§8] §7Üdv a szerveren!\n \nAhhoz, hogy tudj játszani regisztrálnod kell a szerverre. Ezt  egyszerűen megteheted a: §l§a/regisztral <jelszó> §r§7paranccsal!§r");
-            new BukkitRunnable() {
-                int i = 0;
-                @Override
-                public void run() {
-                    if(bejelentkezetlen.containsKey(event.getPlayer())) {
-                        jatekos.addPotionEffect(lassusagEffekt);
-                        jatekos.addPotionEffect(vaksagEffekt);
-                        jatekos.addPotionEffect(ugrasEffekt);
-                        jatekos.addPotionEffect(lassuBanyaszasEffekt);
-                        event.getPlayer().setNoDamageTicks(Integer.MAX_VALUE);
-                        jatekos.sendMessage("§7Regisztrálj a szerverre a: §l§a/regisztral <jelszó> §r§7paranccsal!§r");
-                        i++;
-                    }
-                    else{
-                        cancel();
-                    }
-                    if (i > 4 && bejelentkezetlen.containsKey(event.getPlayer())) {
-                        jatekos.kickPlayer("Lejárt a regisztrálásra alkalmas időd!");
-                        cancel();
-                    }
+                else {
+                    event.getPlayer().kickPlayer("Nem sikerült csatlakoznod a szerverre, mert más helyről próbáltál csatlakozni. Kérlek várj pár másodpercet, vagy csatlakozz arról az eszközről, amiről kiléptél!");
                 }
-            }.runTaskTimer(this, 700, 700);
+            }
+        }
+        else{
+            event.setJoinMessage("");
+            Player jatekos = event.getPlayer();
+            jatekos.setGameMode(GameMode.ADVENTURE);
+            jatekosUUID = jatekos.getUniqueId().toString();
+            String utvonalJatekos = hely.toAbsolutePath() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml";
+            File jatekosFiok = new File(utvonalJatekos);
+            jatekos.addPotionEffect(lassusagEffekt);
+            jatekos.addPotionEffect(vaksagEffekt);
+            jatekos.addPotionEffect(ugrasEffekt);
+            jatekos.addPotionEffect(lassuBanyaszasEffekt);
+            event.getPlayer().setNoDamageTicks(Integer.MAX_VALUE);
+            bejelentkezetlen.put(jatekos.getPlayer(), "Nincs bejelentkezve!");
+            System.out.println(utvonalJatekos);
+            System.out.println(jatekosFiok);
+            if (jatekosFiok.exists()) {
+                jatekos.sendMessage("§8[§6>>§8] §7Üdv újra a szerveren!\n \nKérlek jelentkezz be a: §l§a/belep <jelszó> §r§7paranccsal!§r");
+                new BukkitRunnable() {
+                    int i = 0;
+
+                    @Override
+                    public void run() {
+                        if (bejelentkezetlen.containsKey(event.getPlayer())) {
+                            jatekos.addPotionEffect(lassusagEffekt);
+                            jatekos.addPotionEffect(vaksagEffekt);
+                            jatekos.addPotionEffect(ugrasEffekt);
+                            jatekos.addPotionEffect(lassuBanyaszasEffekt);
+                            event.getPlayer().setNoDamageTicks(Integer.MAX_VALUE);
+                            jatekos.sendMessage("§7Jelentkezz be a szerverre a: §l§a/belep <jelszó> §r§7paranccsal!§r");
+                            i++;
+                        } else {
+                            cancel();
+                        }
+                        if (i > 4 && bejelentkezetlen.containsKey(event.getPlayer())) {
+                            jatekos.kickPlayer("Lejárt a belépésre alkalmas időd!");
+                            cancel();
+                        }
+                    }
+                }.runTaskTimer(this, 700, 700);
+            } else {
+                jatekos.sendMessage("§8[§6>>§8] §7Üdv a szerveren!\n \nAhhoz, hogy tudj játszani regisztrálnod kell a szerverre. Ezt  egyszerűen megteheted a: §l§a/regisztral <jelszó> §r§7paranccsal!§r");
+                new BukkitRunnable() {
+                    int i = 0;
+
+                    @Override
+                    public void run() {
+                        if (bejelentkezetlen.containsKey(event.getPlayer())) {
+                            jatekos.addPotionEffect(lassusagEffekt);
+                            jatekos.addPotionEffect(vaksagEffekt);
+                            jatekos.addPotionEffect(ugrasEffekt);
+                            jatekos.addPotionEffect(lassuBanyaszasEffekt);
+                            event.getPlayer().setNoDamageTicks(Integer.MAX_VALUE);
+                            jatekos.sendMessage("§7Regisztrálj a szerverre a: §l§a/regisztral <jelszó> §r§7paranccsal!§r");
+                            i++;
+                        } else {
+                            cancel();
+                        }
+                        if (i > 4 && bejelentkezetlen.containsKey(event.getPlayer())) {
+                            jatekos.kickPlayer("Lejárt a regisztrálásra alkalmas időd!");
+                            cancel();
+                        }
+                    }
+                }.runTaskTimer(this, 700, 700);
+            }
         }
     }
 
@@ -140,6 +173,24 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
         if(!bejelentkezetlen.containsKey(event.getPlayer())) {
             Bukkit.broadcastMessage("§8[§4-§8] §7§ " + event.getPlayer().getName());
         }
+        new BukkitRunnable() {
+            int i = 0;
+
+            @Override
+            public void run() {
+                if (!event.getPlayer().isOnline()){
+                    i++;
+                    System.out.println("Mindjárt kilépek!" + i);
+                } else {
+                    cancel();
+                }
+                if (i > 4) {
+                   bejelentkezet.remove(event.getPlayer().getName());
+                    System.out.println("Kilépve!" + i);
+                    cancel();
+                }
+            }
+        }.runTaskTimer(this, 60, 60);
     }
 
     @EventHandler
@@ -170,9 +221,13 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
         }
     }
     public boolean onCommand(CommandSender kuldo, Command parancs, String szoveg, String[] args) {
+        Player jatekos = (Player) kuldo;
+        if(parancs.getName().equalsIgnoreCase("kijelentkez")) {
+            bejelentkezet.remove(jatekos.getName());
+            jatekos.kickPlayer("Sikeresen kijelentkeztél!");
+        }
         if (parancs.getName().equalsIgnoreCase("regisztral") || parancs.getName().equalsIgnoreCase("r")) {
             try {
-                Player jatekos = (Player) kuldo;
                 jatekosUUID = jatekos.getUniqueId().toString();
                 String utvonalJatekos = hely.toAbsolutePath() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml";
                 File jatekosFiok = new File(utvonalJatekos);
@@ -203,6 +258,19 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                                 iras.close();
                             }
                             jatekos.sendMessage("§8[§2>>§8] §7Sikeres regisztráció! A legközelebbi csatlakozásnál a megadott jelszóval tudsz bejelentkezni.§r");
+                            String ipCim = "";
+                            try {
+                                URL urlcim = new URL("https://ipapi.co/" + jatekos.getPlayer().getAddress().getAddress().getHostAddress() + "/ip/");
+                                HttpURLConnection csatlakozas = (HttpURLConnection) urlcim.openConnection();
+                                csatlakozas.setRequestMethod("GET");
+                                BufferedReader olvas = new BufferedReader(new InputStreamReader(csatlakozas.getInputStream()));
+                                ipCim = olvas.readLine();
+                                olvas.close();
+                                csatlakozas.disconnect();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            bejelentkezet.put(jatekos.getName(), ipCim);
                             Bukkit.broadcastMessage("§8[§2+§8] §7§ " + jatekos.getName());
                             jatekos.setGameMode(GameMode.SURVIVAL);
                             jatekos.removePotionEffect(lassusag);
@@ -232,7 +300,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
         }
         if (parancs.getName().equalsIgnoreCase("belep") || parancs.getName().equalsIgnoreCase("b")) {
             try {
-                Player jatekos = (Player) kuldo;
                 bemenet = String.join(" ", args);
                 jatekosUUID = jatekos.getUniqueId().toString();
                 String utvonalJatekos = hely.toAbsolutePath() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml";
@@ -257,6 +324,20 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                     String jatekosU = sb.toString();
                     if (jatekosU.equals(jatekosVisszakapott)) {
                         jatekos.sendMessage("§8[§2>>§8] §7Sikeres bejelentkezés!");
+                        System.out.println(bejelentkezet);
+                        String ipCim = "";
+                        try {
+                            URL urlcim = new URL("https://ipapi.co/" + jatekos.getPlayer().getAddress().getAddress().getHostAddress() + "/ip/");
+                            HttpURLConnection csatlakozas = (HttpURLConnection) urlcim.openConnection();
+                            csatlakozas.setRequestMethod("GET");
+                            BufferedReader olvas = new BufferedReader(new InputStreamReader(csatlakozas.getInputStream()));
+                            ipCim = olvas.readLine();
+                            olvas.close();
+                            csatlakozas.disconnect();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        bejelentkezet.put(jatekos.getName(), ipCim);
                         Bukkit.broadcastMessage("§8[§2+§8] §7§ " + jatekos.getName());
                         jatekos.setGameMode(GameMode.SURVIVAL);
                         jatekos.removePotionEffect(lassusag);
