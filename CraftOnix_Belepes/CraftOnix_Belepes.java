@@ -186,7 +186,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                     cancel();
                 }
             }
-        }.runTaskTimer(this, 200, 200);
+        }.runTaskTimer(this, 300, 300);
     }
 
     @EventHandler
