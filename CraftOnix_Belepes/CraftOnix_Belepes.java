@@ -190,7 +190,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                     cancel();
                 }
             }
-        }.runTaskTimer(this, 60, 60);
+        }.runTaskTimer(this, 200, 200);
     }
 
     @EventHandler
@@ -198,15 +198,6 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
         if (bejelentkezetlen.containsKey(event.getPlayer())) {
             if (event.getFrom().getBlockX() != event.getTo().getBlockX() || event.getFrom().getBlockY() != event.getTo().getBlockY() || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
                 event.getPlayer().teleport(event.getPlayer());
-            }
-        }
-    }
-
-    @EventHandler
-    public void sebzes(EntityDamageEvent event, PlayerEvent e) {
-        if (bejelentkezetlen.containsKey(e.getPlayer())) {
-            if (event.getEntity() instanceof Player) {
-                event.setCancelled(true);
             }
         }
     }
@@ -228,18 +219,23 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
         }
         if (parancs.getName().equalsIgnoreCase("regisztral") || parancs.getName().equalsIgnoreCase("r")) {
             try {
+                System.out.println("A játékos beírta a parancsot.");
                 jatekosUUID = jatekos.getUniqueId().toString();
                 String utvonalJatekos = hely.toAbsolutePath() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml";
                 File jatekosFiok = new File(utvonalJatekos);
                 if (jatekosFiok.exists()) {
+                    System.out.println("A játékos létezik.");
                     jatekos.sendMessage("§8[§4>>§8] §7Ezt a parancsot nem használhatod!§r");
                 } else {
+                    System.out.println("A játékos nem létezik.");
                     bemenet = String.join(" ", args);
                     if(gyakoriJelszavak.contains(bemenet) /*&& (bemenet == jatekos.getName())*/){
                         jatekos.sendMessage("§8[§4>>§8] §7Ez a jelszó nem biztonságos! Kérlek használj más jelszót!§r");
                     }
                     else {
+                        System.out.println("A játékos jelszava megfelelő.");
                         if (bemenet.length() > 5 && !bemenet.contains(" ")) {
+                            System.out.println("A játékos regisztrálása.");
                             MessageDigest md = MessageDigest.getInstance("SHA-512");
                             byte[] hash = md.digest(bemenet.getBytes());
                             StringBuilder sb = new StringBuilder();
@@ -253,10 +249,12 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                                 Map<String, String> adat = new HashMap<>();
                                 adat.put("UUID", String.valueOf(entry.getKey()));
                                 adat.put("PASSWD", entry.getValue());
-                                FileWriter iras = new FileWriter(hely.toAbsolutePath() + "/plugins/CraftOnix/fiokok/" + jatekosUUID + ".yml");
+                                FileWriter iras = new FileWriter(hely.toAbsolutePath() + "/plugins/CraftOnix/Fiokok/" + jatekosUUID + ".yml");
                                 yaml.dump(adat, iras);
                                 iras.close();
+                                System.out.println("A játékos regisztrálva.");
                             }
+                            System.out.println("Kilépés a ciklusból");
                             jatekos.sendMessage("§8[§2>>§8] §7Sikeres regisztráció! A legközelebbi csatlakozásnál a megadott jelszóval tudsz bejelentkezni.§r");
                             String ipCim = "";
                             try {
@@ -294,7 +292,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
                     }
                 }
             } catch (Exception e) {
-                return false;
+                System.out.println(e);
             }
 
         }
