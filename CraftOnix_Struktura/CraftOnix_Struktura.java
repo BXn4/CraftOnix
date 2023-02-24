@@ -7,12 +7,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+
+import javax.swing.*;
+
 public final class CraftOnix_Struktura extends JavaPlugin {
     private Path hely = Paths.get("");
     Map<String, Map<String, Object>> rangokAdatai = new LinkedHashMap<>();
@@ -20,6 +21,7 @@ public final class CraftOnix_Struktura extends JavaPlugin {
     Map<String, Object> adminAdatok = new LinkedHashMap<>();
     Map<String, Object> tulajdonosAdatok = new LinkedHashMap<>();
     DumperOptions dumper = new DumperOptions();
+
     public void onEnable() {
         File CraftOnixMappa = new File(hely.toAbsolutePath().toString() + "/plugins/CraftOnix");
         File FiokokMappa = new File(hely.toAbsolutePath().toString() + "/plugins/CraftOnix/Fiokok");
@@ -27,17 +29,14 @@ public final class CraftOnix_Struktura extends JavaPlugin {
         File rangokMappa = new File(hely.toAbsolutePath().toString() + "/plugins/CraftOnix/Rangok");
         File rangokFile = new File(hely.toAbsolutePath().toString() + "/plugins/CraftOnix/Rangok/rangok.yml");
         File rangokFelhasznalok = new File(hely.toAbsolutePath().toString() + "/plugins/CraftOnix/Rangok/felhasznalok.yml");
-        if(!CraftOnixMappa.exists())
-        {
+        if (!CraftOnixMappa.exists()) {
             CraftOnixMappa.mkdir();
         }
-        if(!FiokokMappa.exists())
-        {
+        if (!FiokokMappa.exists()) {
             FiokokMappa.mkdir();
         }
-        if(!gyakoriJelszavakFile.exists())
-        {
-            String[] gyakoriJelszavak = { "# Ez a fájl a szerver biztonságáért felel. Kérlek ne távolítsd el az alábbi elemeket!",
+        if (!gyakoriJelszavakFile.exists()) {
+            String[] gyakoriJelszavak = {"# Ez a fájl a szerver biztonságáért felel. Kérlek ne távolítsd el az alábbi elemeket!",
                     "# A leggyakoribb jelszavak listája 2020.",
                     "# Ezekkel a jelszavakkal nem lehet regisztálni, mivel gyakoriak, és könnyen feltörhetők.",
                     "# Forrás: https://github.com/danielmiessler/SecLists/blob/master/Passwords/2020-200_most_used_passwords.txt",
@@ -73,10 +72,10 @@ public final class CraftOnix_Struktura extends JavaPlugin {
                 throw new RuntimeException(e);
             }
         }
-        if(!rangokMappa.exists()) {
+        if (!rangokMappa.exists()) {
             rangokMappa.mkdir();
         }
-        if(!rangokFile.exists()) {
+        if (!rangokFile.exists()) {
             tagAdatok.put("prefix", "Tag");
             tagAdatok.put("nevSzin", "§2");
             tagAdatok.put("jogok", Arrays.asList("nincs"));
@@ -106,28 +105,19 @@ public final class CraftOnix_Struktura extends JavaPlugin {
                 e.printStackTrace();
             }
         }
-        if(!rangokFelhasznalok.exists()) {
-            rangokAdatai.clear();
-            tagAdatok.clear();
-            adminAdatok.clear();
-            tulajdonosAdatok.clear();
-            rangokAdatai.put("Tag", tagAdatok);
-            rangokAdatai.put("Admin", adminAdatok);
-            rangokAdatai.put("Tulajdonos", tulajdonosAdatok);
-            dumper.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-            Yaml yaml = new Yaml(dumper);
+        if (!rangokFelhasznalok.exists()) {
             try {
                 FileWriter iras = new FileWriter(rangokFelhasznalok);
-                yaml.dump(rangokAdatai, iras);
+                iras.write("Tag:\n");
+                iras.write("  -\n");
+                iras.write("Admin:\n");
+                iras.write("  -\n");
+                iras.write("Tulajdonos:\n");
+                iras.write("  -\n");
                 iras.close();
-                rangokAdatai.clear();
-                tagAdatok.clear();
-                adminAdatok.clear();
-                tulajdonosAdatok.clear();
             } catch (IOException e) {
-                e.printStackTrace();
+                return;
             }
-
         }
     }
 }
