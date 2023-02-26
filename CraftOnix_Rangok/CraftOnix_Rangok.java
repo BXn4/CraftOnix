@@ -17,9 +17,6 @@ public final class CraftOnix_Rangok extends JavaPlugin implements Listener {
     private final Path hely = Paths.get("");
     Map<Object, String> jatekosokRangja = new HashMap<Object, String>();
     Map<String, String> rangokChatSzinezes = new HashMap<String, String>();
-    public Map<String, String> getRangokChatSzinezes() {
-        return rangokChatSzinezes;
-    }
     Permission rangokLekerdezeseJog = new Permission("craftonix_rangok.rangok", "A szerveren elérhető rangok lekérdezése.");
     Permission rangokLetrehozasaJog = new Permission("craftonix_rangok.letrehozas", "Rangok létrehozása.");
     Permission rangokTorleseJog = new Permission("craftonix_rangok.torles", "Rangok törlése.");
@@ -29,7 +26,6 @@ public final class CraftOnix_Rangok extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        Bukkit.getServer().getPluginManager().addPermission(rangokLekerdezeseJog);
         getCommand("rangok").setExecutor(new rangokParancsok(this));
         getServer().getPluginManager().registerEvents(this, this);
         File felhasznalokFile = new File(hely.toAbsolutePath() + "/plugins/CraftOnix/Rangok/felhasznalok.yml");
@@ -75,31 +71,38 @@ public final class CraftOnix_Rangok extends JavaPlugin implements Listener {
             rangokChatSzinezes.put(rang, ertek.toString());
         }
         //System.out.println(rangokChatSzinezes);
+        getRangokChatSzinezes();
     }
-
+    public Map<String, String> getRangokChatSzinezes() {
+        return rangokChatSzinezes;
+    }
 
     @EventHandler
     public void jatekosUzenetetKuld(AsyncPlayerChatEvent event) {
         Player jatekos = event.getPlayer();
-        String rang = (jatekosokRangja.get(jatekos.getName()));
-        System.out.println(rangokChatSzinezes);
-        String szinezesEsPrefixRang = (rangokChatSzinezes.get(rang));
-        String prefixSzin = szinezesEsPrefixRang.substring(1, szinezesEsPrefixRang.length() - 1);
-        String[] elvalaszt = prefixSzin.split(",");
-        String prefix = "";
-        String nevSzin = "";
-        for (String szoveg : elvalaszt) {
-            String[] kulcsErtek = szoveg.split("=");
-            String kulcs = kulcsErtek[0].trim();
-            String ertek = kulcsErtek[1].trim();
-            if (kulcs.equals("prefix")) {
-                prefix = ertek;  // fix here
-            } else if (kulcs.equals("nevSzin")) {
-                nevSzin = ertek;
+        try {
+            String rang = (jatekosokRangja.get(jatekos.getName()));
+            //System.out.println(rangokChatSzinezes);
+            String szinezesEsPrefixRang = (rangokChatSzinezes.get(rang));
+            String prefixSzin = szinezesEsPrefixRang.substring(1, szinezesEsPrefixRang.length() - 1);
+            String[] elvalaszt = prefixSzin.split(",");
+            String prefix = "";
+            String nevSzin = "";
+            for (String szoveg : elvalaszt) {
+                String[] kulcsErtek = szoveg.split("=");
+                String kulcs = kulcsErtek[0].trim();
+                String ertek = kulcsErtek[1].trim();
+                if (kulcs.equals("prefix")) {
+                    prefix = ertek;  // fix here
+                } else if (kulcs.equals("nevSzin")) {
+                    nevSzin = ertek;
+                }
+                //System.out.println(prefix);
+                String jatekosUzeneteRanggal = prefix + nevSzin + jatekos.getName() + "§7 >> §r" + event.getMessage();
+                event.setFormat(jatekosUzeneteRanggal);
             }
-            //System.out.println(prefix);
-            String jatekosUzeneteRanggal = prefix + nevSzin + jatekos.getName() + "§7 >> §r" + event.getMessage();
-            event.setFormat(jatekosUzeneteRanggal);
+        } catch (NullPointerException e) {
+            event.setFormat(jatekos.getName() + "§7 >> §r" + event.getMessage());
         }
     }
 }
