@@ -207,6 +207,15 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
             }
         }
     }
+    @EventHandler
+    public void jatekosUzenetetKuld(AsyncPlayerChatEvent event) {
+        if(bejelentkezetlen.containsKey(event.getPlayer()))
+        {
+            event.getPlayer().sendMessage("§8[§4>>§8] §cAmíg nem vagy bejelentkezve, addig nem használhatod a chatet!§r");
+            event.setMessage("");
+            event.setCancelled(true);
+        }
+    }
     public boolean onCommand(CommandSender kuldo, Command parancs, String szoveg, String[] args) {
         Player jatekos = (Player) kuldo;
         if(parancs.getName().equalsIgnoreCase("kijelentkez")) {
