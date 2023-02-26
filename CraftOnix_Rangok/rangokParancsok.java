@@ -23,6 +23,7 @@ public class rangokParancsok implements CommandExecutor {
     public rangokParancsok(CraftOnix_Rangok plugin) {
         this.plugin = plugin;
     }
+
     PluginManager pluginManager = Bukkit.getPluginManager();
     Plugin RangokPlugin = pluginManager.getPlugin("CraftOnix_Rangok");
     DumperOptions dumper = new DumperOptions();
@@ -82,8 +83,7 @@ public class rangokParancsok implements CommandExecutor {
                 jatekos.sendMessage("Sikeresen létrehoztad a(z) " + args[1] + " nevű rangot!");
 
             }
-        }
-            else if (args[0].equalsIgnoreCase("torol")) {
+        } else if (args[0].equalsIgnoreCase("torol")) {
             if (args.length == 1) {
                 jatekos.sendMessage("Nem adtad meg a törlendő rangot!");
             } else {
@@ -106,8 +106,34 @@ public class rangokParancsok implements CommandExecutor {
                 pluginManager.enablePlugin(RangokPlugin);
                 jatekos.sendMessage("Sikeresen törölted a(z) " + args[1] + " nevű rangot!");
             }
-        }else {
-            jatekos.sendMessage("Ismeretlen parancs! Az elérhető parancsokért használd a /rangok help parancsot!");
+        } else if (args[0].equalsIgnoreCase("hozzaad")) {
+            String rang = args[2];
+            String nev = args[1];
+            if (args.length == 1) {
+                jatekos.sendMessage("Nem adtad meg játékost!");
+            } else {
+                if (!(rang == "")) {
+                    jatekos.sendMessage("Nem adtad meg a rangot!");
+                } else {
+                    Map<String, String[]> adatok = new HashMap<>();
+                    adatok.put(rang, new String[]{nev});
+                    Yaml yaml = new Yaml();
+                    try {
+                        FileWriter iras = new FileWriter(hely.toAbsolutePath() + "/plugins/CraftOnix/Rangok/felhasznalok.yml", true);
+                        yaml.dump(adatok, iras);
+                        iras.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    jatekos.sendMessage("Sikeresen hozzáadtad " + nev + "-t" +" a" + rang + " ranghoz!");
+                    pluginManager.disablePlugin(RangokPlugin);
+                    pluginManager.enablePlugin(RangokPlugin);
+                }
+
+            }
+            {
+                jatekos.sendMessage("Ismeretlen parancs! Az elérhető parancsokért használd a /rangok help parancsot!");
+            }
         }
         return true;
     }
