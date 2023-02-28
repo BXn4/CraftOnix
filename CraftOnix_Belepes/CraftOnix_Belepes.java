@@ -168,7 +168,7 @@ public class CraftOnix_Belepes extends JavaPlugin implements CommandExecutor, Li
         Player jatekos = event.getPlayer();
         event.setQuitMessage("");
         if(!bejelentkezetlen.containsKey(jatekos)) {
-            Bukkit.broadcastMessage("§8[§4-§8] §7§ " +jatekos);
+            Bukkit.broadcastMessage("§8[§4-§8] §7§ " +jatekos.getName());
         }
         new BukkitRunnable() {
             int i = 0;
